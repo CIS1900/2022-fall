@@ -325,6 +325,8 @@ You can use this instead of passing the program name as a command line argument 
 If the current line is a function call, it steps *into* the function call.
 - `next` which is similar to `step`, but steps *over` any function calls.
 - `watch var` which stops each time the variable `var` changes.
+- `up` and `down` moves "up" and "down" the stack frames.
+This is useful when you are deep within a call stack, and you wish to see the state higher up in the call stack.
 
 There are many other features which you can find in the `gdb` manfile (using `man gdb`) or online.
 There are also likely ways to integrate `gdb` with your favorite IDE or editor, so you can debug directly in the source code editor.
