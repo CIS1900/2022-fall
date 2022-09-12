@@ -8,6 +8,8 @@ After many decades of development, it is now a general purpose, multi-paradigm l
 Unlike many languages, C++ is not managed by a company or person, but by a committee.
 Anyone can join the committee if they commit to meetings and pay a small fee.
 The committee votes and decides on changes to the language and any new features.
+Rather than write a compiler for this language, the committee creates a *standard*, describing how the language should behave.
+This allows for others to write their own compilers, all implementing a common standard.
 
 ### Design Principles of C++
 
@@ -27,7 +29,7 @@ This will be an active learning class.
 For future classes, you will be required to read the course notes ahead of time to get familiar with the material.
 Before class, you will complete a small quiz to check your understanding.
 The quiz is only graded for completion.
-In class, we will do small ungraded exercises to solidify understanding, and graded assignments, both in pairs.
+In class, we will do small ungraded exercises and bigger graded assignments to solidify understanding, both in pairs.
 
 ## C
 
@@ -39,7 +41,7 @@ In this lecture, we will do a very quick review of the language.
 
 We start with a standard hello world program:
 
-INSERT LINK hello.c
+https://github.com/CIS1900/2022-fall/blob/26cc1f911eb59684b41d9e2e58d300ba443f4cb4/01/hello.c#L1-L7
 
 Compile this program with `gcc -Wall -g -o hello hello.cpp`, and run the resulting executable with `./hello`. The command line options we used are the following:
 - `-Wall` enables all compiler warnings, so we can see if the compiler finds any strange things in our code. Try adding an extraneous variable to the file and compile with and without `-Wall`.
@@ -79,11 +81,11 @@ Functions must be *declared* before being used.
 This function declaration is also called a function *prototype*, and includes the name of the function, its return type, and the number and type of its arguments.
 A function definition also functions as a declaration, but declarations are sometimes necessary, when you have cyclic dependencies between functions, like the following:
 
-INSERT LINK evenodd.c
+https://github.com/CIS1900/2022-fall/blob/26cc1f911eb59684b41d9e2e58d300ba443f4cb4/01/evenodd.c#L1-L22
 
 There is no way to reorder the function definitions so they are defined before use, so we need a declaration at the top:
 
-```
+```c
 int odd(int);
 ```
 
@@ -110,7 +112,9 @@ if (condition)
 {
     ...
 }
+```
 
+```c
 if (condition)
 {
     ...
@@ -123,7 +127,9 @@ else
 {
     ...
 }
+```
 
+```c
 if(condition)
     statement;
 else
@@ -138,7 +144,7 @@ Another way of branching on some value is `switch`.
 `switch` allows you to examine an expression and write `case`s for what the value is equal to.
 The following is an example of a `switch` on a `char` variable:
 
-```
+```c
 char c = ...;
 
 switch (c)
@@ -162,7 +168,7 @@ There is also a special `default` case which runs either due to fall-through or 
 C has three kinds of loops to repeat statements.
 The first is a for loop:
 
-```
+```c
 for (init; condition; update)
 {
     ...
@@ -174,7 +180,7 @@ After each iteration, the `update` portion is run.
 
 A `while` loop is like a `for` loop, but without the initialization and update portions:
 
-```
+```c
 while (condition)
 {
     ...
@@ -185,7 +191,7 @@ Like with `if` statements, if the body of the `for` or `while` loop is a single 
 
 The third type of loop is a `do-while` loop:
 
-```
+```c
 do
 {
     ...
@@ -215,7 +221,7 @@ This means that the value you pass to the function is copied, so if you pass a v
 By passing a pointer to the variable, we can access it from inside the function, allowing us to, in some sense, simulate passing by reference.
 In the below example, we pass the quotient and remainder variables by reference, so that the function can update both of those variables from inside the function.
 
-INSERT LINK remainder.c
+https://github.com/CIS1900/2022-fall/blob/26cc1f911eb59684b41d9e2e58d300ba443f4cb4/01/remainder.c#L1-L20
 
 The second reason deals with memory allocation.
 Sometimes, regular variables allocated on the stack are not sufficient.
@@ -235,7 +241,7 @@ When a variable goes out of scope, its data is automatically deallocated later, 
 Sometimes, this is undesireable, and we want memory that stays alive for as long as we want.
 Manually allocated memory using `malloc` has this property, which is another use of pointers.
 
-INSERT LINK malloc.c
+https://github.com/CIS1900/2022-fall/blob/26cc1f911eb59684b41d9e2e58d300ba443f4cb4/01/malloc.c#L1-L33
 
 ### `const`
 
@@ -247,6 +253,9 @@ With pointers it becomes a little more complex.
 This means the pointer itself can be modified to point to another address, as long as it points to another `const int`.
 To make the pointer `const`, we need to write it so that `const` applied to the pointer portion.
 `const int * const` does the trick, declaring a `const` pointer which points to `const int`s.
+This is a pointer, that once initialized, cannot be changed to point to something else.
+The thing it points to is also `const`, so operations that change it, like `(*p)++`, are also disallowed.
+
 In general, reading the type from right to left helps with understanding which `const` applies to which part of the type.
 
 ### Common pointer bugs
@@ -292,7 +301,7 @@ Modifying this array is perfectly fine and does not result in undefined behavior
 
 Consider the following program:
 
-INSERT LINK debug.c
+https://github.com/CIS1900/2022-fall/blob/26cc1f911eb59684b41d9e2e58d300ba443f4cb4/01/debug.c#L1-L21
 
 Once we compile this program (with the `-g` flag!), we can use `gdb` to load (TODO) the executable using `gdb debug` if `debug` is the name of the executable.
 This will start `gdb`, and you can then start running the program by typing `run`.
@@ -328,4 +337,4 @@ Once the executable terminates, it will give you a report of memory leaks.
 
 For example, try compiling the following program which exhibits a memory leak, and see what `valgrind` tells you:
 
-INSERT LINK leak.c
+https://github.com/CIS1900/2022-fall/blob/26cc1f911eb59684b41d9e2e58d300ba443f4cb4/01/leak.c#L1-L6
