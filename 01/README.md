@@ -43,7 +43,7 @@ We start with a standard hello world program:
 
 https://github.com/CIS1900/2022-fall/blob/26cc1f911eb59684b41d9e2e58d300ba443f4cb4/01/hello.c#L1-L7
 
-Compile this program with `gcc -Wall -g -o hello hello.cpp`, and run the resulting executable with `./hello`. The command line options we used are the following:
+Compile this program with `gcc -Wall -g -o hello hello.c`, and run the resulting executable with `./hello`. The command line options we used are the following:
 - `-Wall` enables all compiler warnings, so we can see if the compiler finds any strange things in our code. Try adding an extraneous variable to the file and compile with and without `-Wall`.
 - `-g` enables debugging information in the output executable. This allows us to use the `gdb` debugger to interactively step through our program using that extra information (more on this later).
 - `-o hello` specifies to put the output executable in a file called `hello`. If you omit this option, it will put your executable in a file named `a.out`.
