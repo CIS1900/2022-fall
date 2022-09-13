@@ -238,7 +238,7 @@ Furthermore, by using pointers to represent the memory location of our data, we 
 
 Another issue with regular stack variables is that they strictly obey lexical scope.
 When a variable goes out of scope, its data is automatically deallocated later, and it is no longer allowed to refer to that piece of memory.
-Sometimes, this is undesireable, and we want memory that stays alive for as long as we want.
+Sometimes, this is undesirable, and we want memory that stays alive for as long as we want.
 Manually allocated memory using `malloc` has this property, which is another use of pointers.
 
 https://github.com/CIS1900/2022-fall/blob/26cc1f911eb59684b41d9e2e58d300ba443f4cb4/01/malloc.c#L1-L33

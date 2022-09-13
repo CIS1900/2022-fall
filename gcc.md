@@ -32,7 +32,7 @@ Specifically, you can run `sudo apt install valgrind` and `sudo apt install g++-
 
 `valgrind` is not supported on newer versions of macOS.
 To use `valgrind`, you should use the SEAS servers or install a Linux virtual machine.
-There are also an [unofficial port](https://github.com/LouisBrunner/valgrind-macos) of `valgrind` that you can install using Homebrew, but I cannot guarantee that it works.
+There is also an [unofficial port](https://github.com/LouisBrunner/valgrind-macos) of `valgrind` that you can install using Homebrew, but I cannot guarantee that it works.
 
 By default, `g++` on a Mac defaults to `clang++`.
 To install the real GCC compiler, the easiest way is to use Homebrew.
