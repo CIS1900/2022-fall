@@ -8,7 +8,7 @@ These notes are shorter than usual since we did not get through all the material
 
 We again start with a standard hello world program:
 
-INSERT LINK hello.cpp
+https://github.com/CIS1900/2022-fall/blob/61d0d122f5947dd1522fa81fc34e929f3d97d241/02/hello.cpp#L1-L8
 
 For C++ programs, we compile using `g++ -std=c++20 -Wall -g -o hello hello.cpp`.
 Depending on how you installed GCC from the [instructions](../gcc.md), you may need to use `g++-10` instead of `g++`.
@@ -168,7 +168,7 @@ The second variant is `new T[n]`, which allocates memory for an array of `n` val
 
 These variants must not be mixed, so memory allocated using `new` must be deallocated using `delete`, and memory allocated using `new T[]` must be deallocated using `delete[]`.
 
-INSERT LINK newdelete.cpp
+https://github.com/CIS1900/2022-fall/blob/61d0d122f5947dd1522fa81fc34e929f3d97d241/02/newdelete.cpp#L1-L10
 
 ## References
 
@@ -178,7 +178,7 @@ Note that `*` and `&` are part of the type, so it is typically written as `int&`
 A reference is effectively a pointer that gets automatically dereferenced, and that cannot be changed to reference something else (like a `const` pointer).
 For example, we can redo the pass by reference example from last class:
 
-INSERT LINK remainder.cpp
+https://github.com/CIS1900/2022-fall/blob/61d0d122f5947dd1522fa81fc34e929f3d97d241/02/remainder.cpp#L1-L20
 
 We can avoid some pointer bugs by using references, like null pointer bugs.
 This is because references *must* be initialized, so there is no "null" reference.
