@@ -26,7 +26,7 @@ Be sure to test the version you installed using `g++ --version` (or `g++-10 --ve
 While you can install GCC natively on Windows, a far easier solution is to use the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/), which gives you a Linux environment directly on Windows.
 Installation instructions are [here](https://docs.microsoft.com/en-us/windows/wsl/install).
 The easiest choice is the Ubuntu Linux distribution, where then you can then follow the Linux instructions above.
-Specifically, you can run `sudo apt install valgrind` and `sudo apt install g++-10` to install those two tools.
+Specifically, you can first run `sudo apt update` then run `sudo apt install valgrind` and `sudo apt install g++-10` to install those two tools.
 
 ## Mac
 
