@@ -10,7 +10,7 @@ public:
     point(int x, int y) : x {x}, y {y}
     {}
 
-    double distanceFromOrigin() const
+    double distanceFromOrigin()
     {
         return std::sqrt(x * x + y * y);
     }
@@ -18,8 +18,7 @@ public:
 
 int main()
 {
-    const point p {1, -1};
+    point p {1, -1};
 
-    // would not work if distanceFromOrigin was not marked as const
     std::cout << "distance from origin: " << p.distanceFromOrigin() << "\n";
 }
