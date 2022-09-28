@@ -52,7 +52,7 @@ If we do this and remove our other constructor as well, then this would make it 
 
 Default values for member variables can also be specified where they are declared, which is used to initialize the variable if it was not already initialized in an initializer list.
 
-INSERT LINK point4.cpp
+https://github.com/CIS1900/2022-fall/blob/026adcb5023fc3e777d43dec48131a8692263f9d/04/point4.cpp#L1-L24
 
 ### `const`
 
