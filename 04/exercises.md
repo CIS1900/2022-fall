@@ -20,5 +20,5 @@ Always evaluate your sources!
 ## Exercise 2
 
 Take the [inheritance example](https://github.com/CIS1900/2022-fall/blob/main/04/inheritance.cpp) from the notes and convert the `animal` and `dog` classes to be in separate files.
-You should create 4 files, `animal.hpp`, `animal`.cpp`, `dog.hpp`, and `dog.cpp`.
+You should create 4 files, `animal.hpp`, `animal.cpp`, `dog.hpp`, and `dog.cpp`.
 You should also test these using another file with a `main` function.
