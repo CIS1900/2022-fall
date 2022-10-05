@@ -5,32 +5,20 @@ Passing objects of that class around works fine, and copying the object just cop
 
 But when a class holds a *resource* that must be manually managed, like dynamically allocated memory, things get more complex.
 For example, using objects of the following class would result in a memory leak, since the memory allocated using `new` is never deallocated with `delete`.
-In these notes, we go over five special functions that C++ uses to manipulate all objects.
 
-INSERT LINK eg0
+https://github.com/CIS1900/2022-fall/blob/46959051422f7754f36fe8cfa15bdac7288f4d74/05/eg0.cpp#L1-L32
 
 Other examples of resources include things like file handles, locks, or remote web connections.
 These examples all need to be "cleaned up" once used, which also makes *copying*, a core concept in C++, more complex.
-
-### Aside: implicit conversions
-
-First I want to introduce a feature of constructors.
-Constructors define an implicit conversion from its argument types.
-For example, the `integer` class above has a constructor which takes an argument of type `int`.
-This results in an implicit conversion from `int` to `integer` being created, and if you had a function that takes an `integer`, you could pass it an `int` instead, and an `integer` would be created using the constructor with the provided `int`.
-If `integer` had another constructor that took *two* `int` arguments, this also creates an implicit conversion, but it must be used in a slightly unnatural way, for example by passing `{1, 2}`.
-
-These implicit conversions can be confusing.
-For example, if you had a class of lists and a constructor which takes the initial length of the list, then the user may mistake that for the contents of a list of length 1, and get the wrong result.
-You can disable the conversion by putting `explicit` before the constructor (e.g. `explicit integer(int i) ...`).
+In these notes, we will go over five special functions that handle these sort of operations on objects.
 
 ## Destructors
 
 To handle cleanup, C++ has destructors, which are like the inverse of a constructor.
-These are written like a constructor, but with a `~` in front and has no arguments.
+These are defined like a constructor, but with a `~` in front and has no arguments.
 While constructors were present in other languages before C++, destructors were a novel feature introduced by C++.
 
-INSERT LINK eg1
+https://github.com/CIS1900/2022-fall/blob/46959051422f7754f36fe8cfa15bdac7288f4d74/05/eg1.cpp#L1-L38
 
 The destructor will be called automatically when the object is cleaned up, either when it goes out of scope for a regular variable or when `delete` is called on it for objects dynamically allocated using `new`.
 You should never have to manually call the destructor.
@@ -49,11 +37,11 @@ A a;
 B b {a};
 ```
 `b` seems to somehow *depend* on `a`, and might internally keep a reference to `a`.
-If `a` were destroyed before `b`, things can go wrong when times comes to destroy `b`, since its reference to `a` is no longer valid.
+If `a` were destroyed before `b`, things can go wrong when the time comes to destroy `b`, since its reference to `a` is no longer valid.
 But C++ will always destroy `b` before `a`, since `b` was declared after `a`.
-While this is not foolproof and programmers can always cause more issues, this solves many simple use cases.
+While this is not foolproof and programmers can always find ways of causing more issues, this solves many simple use cases.
 
-With a class, the destructor also destroys the object's member variables in reverse order, but what is the original order?
+With a class, the destructor also destroys the object's member variables in reverse order, but what in reverse order of what?
 We know that member variables are initialized in the constructor.
 Constructors first initialize their base class, either using one of the base class's constructors if it was in the initializer list (e.g. `derived() : base{...} {...}`), or the default constructor for the base class otherwise.
 Next it initializes class members in *declaration* order, using the initializer list if the member is found in it.
@@ -64,7 +52,7 @@ This is because there can be multiple constructors with multiple orderings, but 
 
 If you try to initialize members out of order like in the following code, then you will get a compiler warning, and things will probably not work as you expect (try running the code!):
 
-INSERT LINK order
+https://github.com/CIS1900/2022-fall/blob/46959051422f7754f36fe8cfa15bdac7288f4d74/05/order.cpp#L1-L20
 
 Now back to the destructor.
 It should run in the opposite order as construction, so it first runs the destructor body, then destroys the members variables in reverse order of declaration, and finally calling the destructors of base classes.
@@ -76,22 +64,22 @@ Again, you never have to call destructors manually.
 Copies are made fairly often in C++, and if the object being copied has some resource it manages, then copying can be non-trivial.
 The default copy operation just copies each member variable, a *shallow copy*.
 For our example, this would cause issues.
-When a copy is made, that copy has the same pointer as the original object, and when the copy is cleaned up and its destructor is called, the original object's internal memory is deallocated.
+When a copy is made, that copy would have the same pointer as the original object, and when the copy is cleaned up and its destructor is called, the original object's internal memory is deallocated.
 When the original object is destroyed eventually, its destructor tries to `delete` the same pointer, and a double free error occurs.
-To fix this, the copy needs to be a *deep copies*, where the value pointed to by the pointer is copied, rather than the pointer itself.
-To write this deep copy code and generally to customize how objects are copied, C++ uses a *copy constructor*.
+To fix this, the copy needs to be a *deep copy*, where the value *pointed to* by the pointer is copied, rather than the pointer itself.
+To write this deep copy code and generally to customize how objects are copied, C++ uses a *copy constructor*, a special constructor to initialize an object by copying another object.
 
 First, we need to understand when copies occur.
 Copies are made when:
-1. Initialization with another object: `integer i {j}`, `integer i(j)`, `integer i = j`.
+1. Initializing with another object: `integer i {j}`, `integer i(j)`, or `integer i = j` (these are all equivalent).
 2. Passing an object (by value) to a function.
 3. Returning an object (by value) from a function.
-4. Throwing an object as an exception (more on this in a later lecture).
+4. Throwing an object as an exception (more on this in the next class).
 5. Assigning an object to another object (more on this in the next section).
 
 Here is an example of (1), where you can see we are calling our copy constructor:
 
-INSERT LINK eg2
+https://github.com/CIS1900/2022-fall/blob/46959051422f7754f36fe8cfa15bdac7288f4d74/05/eg2.cpp#L1-L47
 
 Try commenting out the copy constructor to see the default shallow copy in action, causing a crash.
 
@@ -99,13 +87,13 @@ Try commenting out the copy constructor to see the default shallow copy in actio
 
 To illustrate the other common ways objects are copied (2 and 3), we introduce a new function to our example:
 
-INSERT LINK eg3
+https://github.com/CIS1900/2022-fall/blob/46959051422f7754f36fe8cfa15bdac7288f4d74/05/eg3.cpp#L1-L48
 
 Looking at the rules for when copies are made above, you might think that this code would perform three copies.
 One when `i` is passed to `incr`, one when `i` is returned from `incr`, and one when `j` is constructed from this returned object.
 However, try running this code.
 You will see that it only calls the copy constructor twice.
-This is due to a mechanism called *copy elision*, which can omit some copies in certain cases.
+This is due to a mechanism called *copy elision*, which can elide some copies in certain cases.
 In this case, it can tell that the returned value is immediately used to copy construct another object, so the two copy constructions can be "merged".
 The specifics are not super important, but it is important that you keep in mind that these sort of things can happen, and that you do not overly rely on side effects from your copy constructor.
 
@@ -113,7 +101,7 @@ The specifics are not super important, but it is important that you keep in mind
 
 The first four ways that copies can occur all use the copy constructor, but the last has to do with assignment, which is when we use the `=` operator directly.
 
-INSERT LINK eg4
+https://github.com/CIS1900/2022-fall/blob/46959051422f7754f36fe8cfa15bdac7288f4d74/05/eg4.cpp#L1-L56
 
 Note that `operator=` returns a reference to the assigned object.
 This is to allow things like `i = j = k;`, which would be equivalent to `j = k; i = k;` since `=` is right associative.
@@ -124,7 +112,7 @@ This is another reason why I recommend always using the `{}` initialization synt
 
 One special case to keep in mind is *self assignment*, when a user does something like `i = i;`.
 If we had implemented `operator=` as something like `delete p; p = new int {i.get()};`, this would fail for self assignment!
-You can always check for self assignment manually, using something like `if (this == &other)`
+You can always check for self assignment manually, using something like `if (this == &other)`.
 Self assignment may seem silly, but in complex code with references or pointers that may alias others, this could happen accidentally.
 
 ## Move Construction
@@ -133,23 +121,25 @@ Sometimes, copies are made of objects that are about to be cleaned up, for examp
 In these cases, C++ provides a useful mechanism to avoid the unnecessary copy by simply *moving* the object that is about to be cleaned up into the new object being created.
 This is done using a constructor called a move constructor.
 
-INSERT LINK eg5
+https://github.com/CIS1900/2022-fall/blob/46959051422f7754f36fe8cfa15bdac7288f4d74/05/eg5.cpp#L1-L61
 
-Our move constructor "steals" the pointer from the other object and crucially, resets its pointer to `nullptr`. This is to prevent it from `delete`ing the memory when its destructor runs. `delete nullptr` is safe, and does not do anything.
+Our move constructor "steals" the pointer from the other object and crucially, resets its pointer to `nullptr`.
+This is to prevent it from `delete`ing the memory when its destructor runs.
+`delete nullptr` is safe, and does not do anything.
 
 Note that this is doing the same thing as [`eg3.cpp`](eg3.cpp) above, but with a move constructor defined.
 This allows the program to eliminate one copy construction, which is replaced with a move.
 Objects could contain large amounts of memory, which would have to be allocated and copied over, and this overhead is eliminated with the move.
 
 Move constructors also allow for programmers to enforce that their objects can only be moved, not copied, by disabling the copy constructor using `= delete`.
-This makes sense for single-ownership objects, like an `ifstream`.
-It may not make sense for you be able to duplicate an object that represents an open file, but why not move it?
+This makes sense for single-ownership objects, like `ifstream`s.
+It may not make sense for you be able to duplicate an object that represents an open file, but moving it should be allowed.
 
 ### rvalue References
 
-The `&&` denotes what's known as an *rvalue reference*.
+The `&&` in the move constructor denotes what's known as an *rvalue reference*.
 To understand this we first need to talk about lvalues and rvalues.
-*lvalues` are expressions that can appear on the left side of an assignment.
+*lvalues* are expressions that can appear on the left side of an assignment.
 These include things like variables and references, which can be assigned to.
 lvalues can also appear on the right side of an assignment without issue.
 rvalues, on the other hand, can *only* appear on the right side of an assignment, and they can be thought of as "temporaries".
@@ -169,18 +159,19 @@ If you are really interested, [this in-depth explanation](https://stackoverflow.
 Just like with the copy assignment earlier, we need to handle assignment separately from construction.
 The move assignment provides an optimization when we assign to an `integer` using a temporary.
 
-INSERT LINK eg6
+https://github.com/CIS1900/2022-fall/blob/46959051422f7754f36fe8cfa15bdac7288f4d74/05/eg6.cpp#L1-L73
 
-Self assignment is not possible with move assignment.
+Here, the return value of `incr` is an rvalue, so the move assignment operator is called rather than copy assignment.
+Note that self assignment cannot happen with move assignment, since a variable is an lvalue.
 
 ### Moving lvalues
 
 Moves normally only happen when dealing with rvalues.
-But C++ provides a way to move lvalues as well, with `std::move`.
+But C++ provides a way to move lvalues as well, with `std::move` (found in `<utility>`, but also some other standard headers too).
 `move(e)` effectively "casts" an lvalue `e` into an rvalue, forcing a move.
 The move will change `e`, however, so you must be careful to not use it any more after the move.
 
-INSERT LINK eg7
+https://github.com/CIS1900/2022-fall/blob/46959051422f7754f36fe8cfa15bdac7288f4d74/05/eg7.cpp#L1-L73
 
 This code moves `i` to avoid the copy, even though it's an lvalue.
 It would not be valid to use `i` after the move, since its memory has been "stolen" and it is no longer in a usable state.
@@ -188,11 +179,11 @@ Using `move` in this way can be useful if you know for a fact that you will not 
 
 Using `move`, self assignment *is* possible with move assignment, as `i = move(i)`.
 However, the C++ standard says you can assume this sort of thing is not performed, and the user is not allowed to do it.
-But checking for this case is very cheap, so you could add the self assignment check to your move assignment if you so desire.
+But checking for this case is very cheap, so you could add the self assignment check to your move assignment operator if you so desire.
 
 ## Implicitly-Defined Member Functions
 
-Last week we saw that a default constructor is implicitly defined for you if you do not defineyour own constructor.
+Last week we saw that a default constructor is implicitly defined for you if you do not define your own constructor.
 There are a few other definitions that may be implicitly defined for you:
 - The destructor is always implicitly defined if you don't define it yourself.
 - The copy constructor and copy assignment operator are implicitly defined if neither the move constructor nor the move assignment operator are user-defined.
@@ -213,7 +204,7 @@ Next is the rule of 3: if you define one or more of the destructor, copy constru
 This is because the presence of one indicates that you probably have something in your class that behaves like a resource, and needs to be managed manually.
 If something needs special treatment when being copied, it probably also needs special treatment to be cleaned up, and vice versa.
 
-While by following the rule of 3 our objects will work perfectly fine, this will also disable the move constructor and move assignment operator, from the rules above.
+While by following the rule of 3 our objects will work perfectly fine, this will also disable the move constructor and move assignment operator, from the implicit definition rules above.
 This means we lose out on some performance, and our code will perform more copies than needed.
 This leads us to the rule of 5: if you defined one or more of the five special member functions, you probably need all five.
 The justification is the same as the rule of 3, but adds the move operations for a performance boost.
@@ -223,5 +214,16 @@ The justification is the same as the rule of 3, but adds the move operations for
 When you have a class hierarchy, you will have to call the copy/move constructor/`operator=` manually in your special functions.
 The base constructor should go into the initializer list, as usual, and the `operator=` can be called as `Base::operator=(...)`.
 The implicitly-defined functions will do this for you.
-For *all* constructors, if the initializer list does not contain any base class constructor, it will automatically call the default constructor of the base class.
-Finally, as noted above, destructors will always call the base class destructor.
+As noted earlier, for *all* constructors, including copy and move constructors, if the initializer list does not contain any base class constructor, it will automatically call the default constructor of the base class.
+Again, to recap from earlier, destructors will always call the base class destructor automatically.
+
+## Aside: implicit conversions
+
+Constructors define an implicit conversion from its argument types.
+For example, the `integer` class above has a constructor which takes an argument of type `int`.
+This results in an implicit conversion from `int` to `integer` being created, and if you had a function that takes an `integer`, you could pass it an `int` instead, and an `integer` would be created using the constructor with the provided `int`.
+If `integer` had another constructor that took *two* `int` arguments, this also creates an implicit conversion, but it must be used in a slightly unnatural way, for example by passing `{1, 2}`.
+
+These implicit conversions can be confusing.
+For example, if you had a class of lists and a constructor which takes the initial length of the list, then the user may mistake that for the contents of a list of length 1, and get the wrong result.
+You can disable the conversion by putting `explicit` before the constructor (e.g. `explicit integer(int i) ...`).
