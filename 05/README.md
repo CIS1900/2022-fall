@@ -104,7 +104,7 @@ The first four ways that copies can occur all use the copy constructor, but the 
 https://github.com/CIS1900/2022-fall/blob/46959051422f7754f36fe8cfa15bdac7288f4d74/05/eg4.cpp#L1-L56
 
 Note that `operator=` returns a reference to the assigned object.
-This is to allow things like `i = j = k;`, which would be equivalent to `j = k; i = k;` since `=` is right associative.
+This is to allow things like `i = j = k;`, which would be equivalent to `j = k; i = j;` since `=` is right associative.
 A less confusing use of this is something like `if (i = j) ...`, which performs the assignment and then checks the value of `i`.
 
 Another note: when you initialize an object using `=` like `integer j = integer(10);`, this is just a regular copy construction, and does not use the assignment operator at all.
