@@ -224,7 +224,7 @@ If the original `shared_ptr` no longer holds that memory, then `lock()` returns 
 If that `shared_ptr` is still holding the original pointer, then `lock()` returns a copied `shared_ptr`, allowing us to use it to do standard pointer operations.
 Since this made a copy, the reference count increased by one and it is guaranteed that the pointer stays alive for the duration of this `shared_ptr`.
 
-ASDF
+https://github.com/CIS1900/2022-fall/blob/39c32843c1291e9838a9c48396def58a3e998d45/06/weak.cpp#L1-L41
 
 One essential use of `weak_ptr` is to break cycles in `shared_ptr`s.
 As shown in the code above, if two objects have `shared_ptr`s to each other, the reference count will never fall to 0, and the two objects will never be destroyed, leading to a memory leak.
