@@ -1,12 +1,12 @@
 # Class 8
 
 In this week's notes we'll go over the concurrency features of the C++ standard library.
-I scheduled this for this week since not everyone has seen concurrency before, and this will likely be difficult if it's your first time seeing it.
+Not everyone has seen concurrency before, and this will likely be difficult if it's your first time seeing it.
 For that reason, this is during the midterm project week, and there won't be an assignment associated with it.
 
 ## Introduction to Concurrency
 
-*Concurrency* is running multiple tasks simultaneously.
+*Concurrency* in programming is running multiple tasks simultaneously.
 This might mean that your code is *multitasking*, or switching between tasks, known as *context switching*.
 Alternatively, it may also mean that the tasks are running in *parallel*, or at the same time.
 This is only possible if your computer has multiple processors, which most computers do nowadays.
@@ -19,7 +19,7 @@ If your program must wait for something and there is other work to be done in th
 
 In these notes, we'll define a *task* as a computuation that can be executed concurrently with other tasks.
 Programatically, a task will be a function, or other things that can be called like functions, which we'll see in a future class.
-A *thread* is the representation of a task by the operation system.
+A *thread* is the representation of a running task by the operating system.
 Threads can run concurrently, either in parallel or by multitasking.
 
 There is a lot of code in this document, and it will be very useful to try running the programs, which can be much more illustrative than just reading the notes.
@@ -30,15 +30,15 @@ If you are using Microsoft Visual C++ on Windows (not `g++` via WSL), then your 
 ## `thread`
 
 A `thread` (in the `<thread>` header) is the standard library class for representing an OS-level thread.
-The task associated with the `thread`, along with any initial values, must be passed to the constructor: the function to run and its arguments.
+The task associated with the `thread` along with any initial values---the function to run and its arguments---must be passed to the constructor.
 As soon as the `thread` is initialized with a task, it starts running (or at least it's possible for it to start running, it depends on how threads are scheduled).
-Once a thread is initialized, at some point you must tell it how you want it to finish, by calvling either `.join()` or `.detach()`.
+Once a thread is initialized, at some point you must tell it how you want it to finish, by calling either `.join()` or `.detach()`.
 `t.join()` will block the current thread, waiting until `t` is finished its task.
 `t.detach()` will allow `t` to run independently, without the current thread waiting for it to finish.
 If you don't call either, once the `thread` goes out of scope, its destructor will terminate the program, which makes signalling your intent mandatory.
 A similar class called `jthread` (for joinable thread) is the same as a `thread`, except it will call `.join()` in its destructor.
 
-INSERT LINK thread.cpp
+https://github.com/CIS1900/2022-fall/blob/4162567a1ad3c63722e4261090519c50e0ad0410/08/thread.cpp#L1-L24
 
 The return value of the `thread`'s task is ignored, so we must use a reference to return a value back to the main thread.
 However, in this example we must wrap the argument passed by reference with `ref`.
@@ -46,7 +46,7 @@ This is due to a technical issue with the variable amount of arguments that the 
 
 ## "Higher-level" Concurrency
 
-This section will discuss methods of writing concurrent code without *synchronization*.
+This section will discuss methods of writing concurrent code without complex *synchronization*.
 Synchronization is controlling the timing of threads, ensuring that they are ordered correctly and work properly.
 We will discuss some common synchronization primitives in the next section, but in this section we will focus on simpler code that does not require complex synchronization.
 
@@ -55,18 +55,18 @@ We will discuss some common synchronization primitives in the next section, but 
 The `async` function (in the `<future>` header) allows you to perform a task *asynchronously*, that is, without waiting for the task to finish as with sequential code, and getting the task's return value later.
 This can be thought of as separating the function *call* from its *return value*.
 
-INSERT LINK async.cpp
+https://github.com/CIS1900/2022-fall/blob/4162567a1ad3c63722e4261090519c50e0ad0410/08/async.cpp#L1-L30
 
 The return value of the `async` call is a `future`, holding the return value which only exists "in the future".
 Once you have the `future`, you can call `.get()` on it to get the return value.
 If that return value is not available yet since the asynchronous task is still running, then we will block here, waiting for the value to be ready.
 Note that calling `.get()` multiple times is undefined behavior.
-You should save the returned value, and you can use `.valid()` to check if `.get()` on the `future` is still safe.
+You should save the returned value and reuse it, and you can use `.valid()` to check if `.get()` on the `future` is still safe.
 
 So what does `async` do?
 It may run the task in another thread, or it may choose to run the task synchronously when the user asks for the return value by calling `.get()`.
 This decision is made at runtime, and might depend on the complexity of the task (if it's simple it may not be worth the overhead of the extra thread) or the current availability of OS threads, or other factors.
-You can force one of the options to always happen by passing in `std::launch::async` or `std::launch::deferred` as the first argument to `async`.
+You can force one of those options to always happen by passing in `std::launch::async` or `std::launch::deferred` as the first argument to `async`.
 In the above code, if the `async` call runs asynchronously, then the program should take 1 second, since both threads sleep at the same time.
 Alternatively, if the `async` call runs synchronously, then the program will run in one thread, and take 2 seconds overall.
 
@@ -75,12 +75,12 @@ If the task requires shared variables or synchronization, you likely want someth
 
 `future`s can also propagate exceptions thrown in the task, rethrowing them when `.get()` is called on the `future`:
 
-INSERT LINK async_exception.cpp
+https://github.com/CIS1900/2022-fall/blob/4162567a1ad3c63722e4261090519c50e0ad0410/08/async_exception.cpp#L1-L24
 
 One final thing to note is that `future`s returned by `async` will block in their destructor until the task is finished and the return value is ready.
-This means that if you don't store hte returned `future` in a variable, then it will be immediately destroyed and block, essentially making the `async` call synchronous rather than asynchronous.
+This means that if you don't store hte returned `future` in a variable, then it will be immediately destroyed and block, essentially making the `async` call synchronous rather than asynchronous:
 
-INSERT LINK async_sync.cpp
+https://github.com/CIS1900/2022-fall/blob/4162567a1ad3c63722e4261090519c50e0ad0410/08/async_sync.cpp#L1-L20
 
 This is specific for `future`s obtained from `async`, and not for the general `future`s in the next section.
 
@@ -89,7 +89,7 @@ This is specific for `future`s obtained from `async`, and not for the general `f
 More generally, `future`s can represent any result that is provided in the future, not just return values from functions.
 This is done using a complementary object called a `promise`, an object representing a "promise" to produce a value later, to be passed to a user through a `future`:
 
-INSERT LINK promise.cpp
+https://github.com/CIS1900/2022-fall/blob/4162567a1ad3c63722e4261090519c50e0ad0410/08/promise.cpp#L1-L20
 
 A `promise` has a `future` associated with it, which is obtained using `.get_future()`.
 This member function can only be called once for each `promise`, and calling again is undefined behavior.
@@ -98,10 +98,9 @@ If something goes wrong and and you want this to be signalled to the `future`, `
 
 Sometimes, many threads will want the result of a `future`, but `.get()` can only be called once.
 We could take the return value of `.get()` and share it, but then we have to wait until it's ready in a single thread, then distribute afterwards.
-A `shared_future` allows multiple `thread`s to wait independently on a result, and can be created from a regular `future` using `.share()`.
-This also invalidates the original `future`.
+More conveniently, a `shared_future` allows multiple `thread`s to wait independently on a result, and can be created from a regular `future` using `.share()` (which also invalidates the original `future`).
 
-INSERT LINK shared_future.cpp
+https://github.com/CIS1900/2022-fall/blob/4162567a1ad3c63722e4261090519c50e0ad0410/08/shared_future.cpp#L1-L29
 
 ### `packaged_task`
 
@@ -109,7 +108,7 @@ The final "simple" concurrency class we'll see is `packaged_task`.
 A `packaged_task` basically wraps a function with the capability to return a `future`, allowing us to easily transfer the return value or any thrown exceptions to another thread.
 Since the object wraps a function, the function's type must be specified in the angle brackets following the `packaged_task` type.
 
-INSERT LINK packaged_task.cpp
+https://github.com/CIS1900/2022-fall/blob/4162567a1ad3c63722e4261090519c50e0ad0410/08/packaged_task.cpp#L1-L20
 
 Since the `packaged_task` owns resources (the task and the internal state for managing the `future`), it cannot be copied and must be `move`d.
 Using `packaged_task`s and `thread`s can be thought of as a "lower-level" alternative to `async`, where the programmer has more control.
@@ -145,35 +144,35 @@ To release ownership, the `thread` owning the `mutex` must call `.unlock()`.
 The code between a `.lock()` and `.unlock()` is called a *critical section*.
 Multiple threads cannot be in the critical section concurrently.
 
-INSERT LINK mutex.cpp
+https://github.com/CIS1900/2022-fall/blob/4162567a1ad3c63722e4261090519c50e0ad0410/08/mutex.cpp#L1-L30
 
 ### Locking `mutex`s
 
 Using `.lock()` and `.unlock()` on a mutex is not ideal.
 Like using `new` and `delete` manually, this results in no exception safety guarantee:
 
-INSERT LINK mutex_exception.cpp
+https://github.com/CIS1900/2022-fall/blob/4162567a1ad3c63722e4261090519c50e0ad0410/08/mutex_exception.cpp#L1-L29
 
 When the exception is thrown, the `.unlock()` call is skipped, and this results in the other `thread` waiting for the `mutex` forever.
 Like memory, a `mutex` is a resource, so using RAII to acquire and release the resource is essential here.
 `scoped_lock` is an RAII class that does this.
 It locks a `mutex` on construction and unlocks it on destruction:
 
-INSERt LINK scoped_lock.cpp
+https://github.com/CIS1900/2022-fall/blob/4162567a1ad3c63722e4261090519c50e0ad0410/08/scoped_lock.cpp#L1-L29
 
 This time, the `mutex` will always be unlocked, no matter how we exit the code block.
 
 Another problem with `mutex` is the possibility of deadlock.
 A deadlock occurs when multiple `thread`s acquire and hold a `mutex` while waiting for another `mutex`:
 
-INSERT LINK deadlock.cpp
+https://github.com/CIS1900/2022-fall/blob/4162567a1ad3c63722e4261090519c50e0ad0410/08/deadlock.cpp#L1-L46
 
 The classic solution to this is to require all threads to acquire `mutex`s in the same order.
-An easier way to do this is to use a single `scoped_lock`.
+Rather than inspecting the code, an easy way to do this is to use a single `scoped_lock`.
 `scoped_lock` can take multiple `mutex`s as arguments in its constructor, which will use a deadlock-avoiding algorithm to acquire them all.
 This algorithm will never block trying to acquire one of the `mutex`s while owning another of the `mutex`s, avoiding deadlock.
 
-INSERT LINK scoped_lock_deadlock.cpp
+https://github.com/CIS1900/2022-fall/blob/4162567a1ad3c63722e4261090519c50e0ad0410/08/scoped_lock_deadlock.cpp#L1-L46
 
 ### Sharing With Reader and Writer Threads
 
@@ -185,7 +184,7 @@ Multiple `thread`s can all own the `shared_mutex` at the shared level, but only 
 Only one `thread` can acquire the `shared_mutex` at the exclusive level at a time, and only if the `shared_mutex` is not acquired.
 To acquire the `shared_mutex` at the different levels, we have RAII classes like `scoped_lock`, `shared_lock` and `unique_lock` for the shared and exclusive levels respectively.
 
-INSERT LINK shared_mutex.cpp
+https://github.com/CIS1900/2022-fall/blob/4162567a1ad3c63722e4261090519c50e0ad0410/08/shared_mutex.cpp#L1-L44
 
 In this example, multiple reader threads are in the critical section at the same time, which you can see by the occasionally interleaved prints.
 
@@ -196,7 +195,7 @@ One option is to use a loop to continually check the condition: `while (conditio
 If the code makes it past this loop, then `condition` must be true!
 Unfortunately, this is both inefficient---this `thread` is stuck checking the condition over and over, wasting CPU time---and it doesn't actually work!
 `condition` is not protected by a `mutex`, so its value may only be `true` for a moment, and then get changed back to `false` by another `thread` once we leave the loop.
-If it were protected by a `mutex`, that `mutex` would have to be continually held, so no other thread could acquire it to update `condition`.
+If it were protected by a `mutex`, that `mutex` would have to be continually held, so no other thread could acquire it to safely update `condition`.
 
 `condition_variable`s (in the `<condition_variable>` header) are a synchronization mechanism for threads to wait until another thread informs it that some condition has become true, and that it can proceed, effectively solving both the issues outlined above.
 A `condition_variable` is used together with a `mutex`, in order to protect the condition that they are waiting on.
@@ -207,7 +206,7 @@ We pass the `unique_lock` to this function, which releases the lock and suspends
 To wake up `thread`s waiting on `condition_variable`s, a `thread` that changes the condition can call `.notify_one()` or `.notify_all()` to wake up one or all waiting `thread`s on that `condition_variable`.
 When a thread wakes up, it will acquire the `unique_lock` again to leave the `.wait()`, to ensure that there is still only one `thread` in the critical section.
 
-INSERT LINK condition_variable.cpp
+https://github.com/CIS1900/2022-fall/blob/4162567a1ad3c63722e4261090519c50e0ad0410/08/condition_variable.cpp#L1-L46
 
 In this example, note that we check the condition using a while loop.
 This is to guard against *spurious wakeup*, where the condition variable wakes up, but the condition is not actually true yet.
@@ -222,7 +221,7 @@ This synchronization primitive keeps track of a number, and provides operations 
 If you try to decrement below 0, the `.acquire()` operation blocks.
 This is useful to signal to waiting threads that something new is available, by incrementing the count.
 
-INSERT LINK semaphore.cpp
+https://github.com/CIS1900/2022-fall/blob/4162567a1ad3c63722e4261090519c50e0ad0410/08/semaphore.cpp#L1-L39
 
 This is useful for allowing multiple threads into a critical section, not just one.
 In this example, we use the semaphore to represent how many values are available to consume in the shared `queue`, and that many consumers are allowed in at the same time.
@@ -241,7 +240,7 @@ A `barrier` requires a set number of threads to arrive before these threads can 
 `thread`s must call `.arrive_and_wait()` to increment the count of waiting threads.
 Once enough `thread`s have arrived, the waiting `thread`s all stop blocking and a function attached to the `barrier` is called.
 
-INSERT LINK barrier.cpp
+https://github.com/CIS1900/2022-fall/blob/4162567a1ad3c63722e4261090519c50e0ad0410/08/barrier.cpp#L1-L26
 
 `latch` is a very similar class, except that threads can increment the count multiple times.
 
@@ -250,3 +249,4 @@ INSERT LINK barrier.cpp
 These notes have *introduced* some basic concurrency features provided by the C++ standard library.
 Even though there was a lot of material, I've left out many of the more complex concurrency topics like `std::atomic` and the C++ memory model.
 Concurrency is a very large and complex topic, and it is unlikely you understood everything if this is your first time seeing it, which is ok!
+Many of these topics will be revisited in courses like CIS 3800, and this material is not crucial to know for using C++.
