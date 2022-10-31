@@ -12,7 +12,7 @@ pair<int, int> state;
 
 void write()
 {
-    for (int i = 0; ; ++i)
+    for (int i {0}; ; ++i)
     {
         this_thread::sleep_for(1s);
 
