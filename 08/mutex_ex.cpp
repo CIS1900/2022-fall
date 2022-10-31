@@ -5,7 +5,7 @@
 using namespace std;
 
 mutex m;
-unsigned int n {0};
+unsigned long long n {0};
 
 void f()
 {
