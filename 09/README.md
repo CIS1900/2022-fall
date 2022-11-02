@@ -18,7 +18,7 @@ All standard library containers provide the `.size()` and `.empty()` member func
 `vector` also allows users to access elements using `[...]` as with an array.
 It further provides `.push_back(i)` to add a new element `i` to the back of the `vector` (by copy/move, just as with other function arguments), increasing the size of the `vector` by one.
 
-INSERT LINK vector.cpp
+https://github.com/CIS1900/2022-fall/blob/900cc0884992eacce339efeef7eabbb81cd12a8d/09/vector.cpp#L1-L18
 
 As seen in this example, just as with normal arrays, `vector`s (and all other standard library containers) support the range-based for loop.
 
@@ -35,16 +35,18 @@ For more details, see [this SO question](https://stackoverflow.com/questions/286
 To slightly improve performance, there is an alternative to `push_back` to adding new elements to a `vector` called `emplace_back`.
 `emplace_back` takes the arguments of an object constructor and initializes the object *in* the `vector`, avoiding the copy or move necessary when creating the object then using `.push_back`:
 
-INSERT LINK emplace.cpp
+https://github.com/CIS1900/2022-fall/blob/900cc0884992eacce339efeef7eabbb81cd12a8d/09/emplace.cpp#L1-L25
+
+This example also shows what happens when the internal array needs to be resized.
 
 Using `[i]` to access elements of the `vector` directly accesses the underlying array, without checking if the index is out of range.
 `vector`s also provide `.at(i)` which accesses the element after checking that `i` is in range, and throws `out_of_range` if it is not.
 There is, of course, some overhead to doing this.
 Tests show that it is around 10%, but this will differ on different machines and architectures.
 
-INSERT LINK range.cpp
+https://github.com/CIS1900/2022-fall/blob/900cc0884992eacce339efeef7eabbb81cd12a8d/09/range.cpp#L1-L24
 
-On my machine, the undefined behavior from the out of bounds access using `[10]` runs without issue, which is very scary.
+On my machine, the undefined behavior from the out of bounds access using `v[10]` runs without issue, which is very scary.
 This can easily lead to bugs occuring later on, if the programmer never notices this and the undefined behavior starts behaving differently on a different machine or on a different run.
 
 Finally, like other containers, `vector`s provide several standard operations:
@@ -52,7 +54,7 @@ Finally, like other containers, `vector`s provide several standard operations:
 - `operator<` checks whether the elements are in lexicographic order, using `<` on the members.
 - `swap`, copy/move constructors/assignments are all defined, which use the corresponding operations on its members.
 
-INSERT LINK operations.cpp
+https://github.com/CIS1900/2022-fall/blob/900cc0884992eacce339efeef7eabbb81cd12a8d/09/operations.cpp#L1-L36
 
 Of course, for these operations to work, the corresponding operations on the type being held inside the `vector` must be defined, like in the `test` class above.
 
@@ -70,7 +72,7 @@ Benefits to using `array` are that it stores its size (using `.size()`, like oth
 There is *no* runtime overhead at all to using `array` over C arrays, since the `array` operations can be translated to operations over a C array at compile time.
 If you are using plain C fixed-length arrays on the stack, then you should be using `array` instead!
 
-INSERT LINK array.cpp
+https://github.com/CIS1900/2022-fall/blob/900cc0884992eacce339efeef7eabbb81cd12a8d/09/array.cpp#L1-L34
 
 This code is also an example of template argument deduction, where some type arguments (in `<>`) can be omitted if the compiler can deduce them.
 Here, the number of elements and their type can be deduced.
@@ -78,9 +80,11 @@ Here, the number of elements and their type can be deduced.
 ### `list`
 
 `list` (in the `<list>` header) provides a doubly-linked list.
-In addition to the operations that other contains like `vector` provide, `list`s also allow you to push or emplace to the front:
+In addition to the common operations that other containers provide, `list`s also allow you to push or emplace to the front:
 
-INSERT LINK list.cpp
+https://github.com/CIS1900/2022-fall/blob/900cc0884992eacce339efeef7eabbb81cd12a8d/09/list.cpp#L1-L16
+
+As usual with a linked list, direct access to elements via `[...]` is not available.
 
 There is also a class for singly-linked lists, `forward_list`, but this class is meant for extremely resource-constrained environments that cannot handle the overhead of the second pointer at each node in `list`.
 For this reason, this class also does not provide `.size()`, saving memory by not storing the size of the list.
@@ -98,13 +102,13 @@ It also typically needs more memory than a `vector` to store the additional impl
 
 C++ also provides some containers which are an alternative interface on top of one of the above containers.
 These are called container *adapters*.
-`stack` and `queue` (in `<stack>` and `<queue>` respectively) are fairly simple and use a `deque` by default, though list can also work for either, and a `vector` is suitable for `stack`.
+`stack` and `queue` (in `<stack>` and `<queue>` respectively) are fairly simple and use a `deque` by default, though `list` can also work for either, and a `vector` is suitable for `stack`.
 `priority_queue` (which is also in `<queue>`) implements a priority queue, providing constant time access for the largest element, and logarithmic time for deleting the largest and inserting other values.
 This uses a `vector` by default, though `deque` is also acceptable.
 Implementation-wise, a `priority_queue` uses the underlying container to define a heap.
 
 The underlying implementation can be specified as the second template argument.
-For example, `stack<int, list<int>> s` would create a stack that uses a `list<int>` as the underlying container.
+For example, `stack<int, list<int>> s` would create a stack of `int`s that uses a `list<int>` as the underlying container.
 
 ### Comparison of Sequence Containers
 
@@ -112,7 +116,7 @@ For example, `stack<int, list<int>> s` would create a stack that uses a `list<in
 | --- | --- | --- | --- |
 | `vector` | O(1) at back<br>O(n) otherwise | O(1) | O(1) at back<br>O(n) otherwise |
 | `deque` | O(1) at front and back<br>O(n) otherwise | O(1) | O(1) at front and back<br>O(n) otherwise |
-| `list`/`forward_list` | O(1) after reaching the element | O(1) at front and back (only for `list`)<br>O(n) otherwise | O(1) after reaching the element |
+| `list`/`forward_list` | O(1) after reaching the element | O(1) at front and back (back only for `list`)<br>O(n) otherwise | O(1) after reaching the element |
 | `priority_queue` | O(log n) | O(1) for the max | O(log n) for the max |
 
 ## Iterators
@@ -130,7 +134,7 @@ To check whether you've arrived at the end of the container, every container als
 See the image on [this page](https://en.cppreference.com/w/cpp/container/vector/begin) for a visual representation.
 Finally, one can move to the next element in the sequence using `++`:
 
-INSERT LINK iterator1.cpp
+https://github.com/CIS1900/2022-fall/blob/900cc0884992eacce339efeef7eabbb81cd12a8d/09/iterator1.cpp#L1-L16
 
 As a side note, the range-based for loop (e.g. `for (auto i : l)`) uses iterators and thus works for any container that provides them.
 
@@ -153,6 +157,7 @@ These capabilities form a hierarchy, though not a class hierarchy.
 While subtyping would be a good fit here, there would be a performance hit due to the many virtual calls.
 Rather, each iterator type is a completely independent class.
 To write functions that can take any kind of iterator as an argument, we'll have to use template arguments, which we'll see next class.
+The same is true of the container classes, which also do not form any class hierarchy.
 
 Here is a simplified description of the iterator hierarchy:
 - All iterators can be incremented (`++`) to go to the next element of its sequence, by compared for equality (`==`, `!=`), and access the element it represents (`*`, `->`).
@@ -170,7 +175,7 @@ As another example, `distance(first, last)` returns the distance between two ele
 It just uses `-` for random access iterators, but for other kinds of iterators it will count the number of `++` necessary to get from `first` to `last` (using `==` to check when to stop).
 This is undefined behavior if `last` is not actually reachable from `first`.
 
-INSERT LINK iterator2.cpp
+https://github.com/CIS1900/2022-fall/blob/900cc0884992eacce339efeef7eabbb81cd12a8d/09/iterator2.cpp#L1-L14
 
 ### Iterator Invalidation
 
@@ -182,7 +187,7 @@ In this following example, we erase the element represented by an iterator from 
 To deal with this, we use the return value of `erase`, which returns an iterator to the element after the erased element.
 To prevent the element following the erased element from being skipped in the loop, the loop only increments `it` if nothing was erased.
 
-INSERT LINK iterator3.cpp
+https://github.com/CIS1900/2022-fall/blob/900cc0884992eacce339efeef7eabbb81cd12a8d/09/iterator3.cpp#L1-L27
 
 See [this chart](https://en.cppreference.com/w/cpp/container#Iterator_invalidation) for a summary of the invalidation rules.
 When using operations that modify the container, check the documentation to see if the return value  provides a way to deal with potential iterator invalidation, like with `erase` above.
@@ -199,7 +204,7 @@ A `map` (in the `<map>` header) is an associative container that is typically im
 `[]` returns a reference to the value corresponding to a key if the key exists in the map.
 If it doesn't yet exist, it will be added with a corresponding default-initialized value.
 
-INSERT LINK map1.cpp
+https://github.com/CIS1900/2022-fall/blob/900cc0884992eacce339efeef7eabbb81cd12a8d/09/map1.cpp#L1-L21
 
 Other familiar member functions are also available, like a checked access using `.at(i)`, `.size()`, `.empty()`, and `.erase()`.
 `.insert(...)` and `.emplace(...)` are also available, though they do not take an iterator to the location to insert at, since `map`s maintain their own order.
@@ -210,7 +215,7 @@ To use a custom class for the key type, this class should be comparable using `o
 If neither element is less than the other (i.e. `!(a < b) && !(b < a)`) then the `map` will consider `a` and `b` equivalent.
 In the following example a wrong implementation of `operator<` results in two objects not being considered equal when they are in fact equal:
 
-INSERT LINK map2.cpp
+https://github.com/CIS1900/2022-fall/blob/900cc0884992eacce339efeef7eabbb81cd12a8d/09/map2.cpp#L1-L45
 
 Other ordering operations (like `>` instead of `<`) can also be specified for a `map`, which we'll see when we talk about function objects in a few classes.
 
@@ -225,10 +230,12 @@ Rather than `[]` or `.at(i)`, the `.count()` or the `.contains()` member functio
 Hash tables can do better than this, with amortized constant-time operations.
 This is what `unordered_map` (in the `<unordered_map>` header) implements.
 The public interface is basically identical to `map`, though an ordering operation is not required.
-Rather, a hashing function is used for the key types, which is already provided for all the built-in and standard library types.
+Rather, a hashing function is used for the key type, which is already provided for all the built-in and standard library types.
+Unlike other languages where the hashing function is a member function, C++ does not have a common base class for all classes.
+This approach requires virtual calls for common functionality like calling the hash function, which is additional performance overhead.
 As with custom comparison operations, we'll cover custom hash functions when we talk about function objects in a few classes.
 
-INSERT LINK unordered_map.cpp
+https://github.com/CIS1900/2022-fall/blob/900cc0884992eacce339efeef7eabbb81cd12a8d/09/unordered_map.cpp#L1-L21
 
 Like its name suggests, `unordered_map` is not ordered, so iterating through one using iterators does not always go in sorted order.
 Prefer `unordered_map` to `map` for the improved performance, unless the sorted order iteration is useful for your use case or writing a good hash function for your key type is too difficult.
