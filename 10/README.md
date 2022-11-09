@@ -5,7 +5,7 @@ This week we'll talk about the feature we've been using without explanation for 
 ## Templates
 
 Templates are useful for writing code that is parameterized by a *type*.
-The way that templates work is that the compiler simply generates a different copy of the code for each instantiation of the template.
+The way that templates work is that the compiler simply generates a different copy of the code for each instantiation of the template, like `vector<int>` and `vector<double>`.
 This results in no runtime overhead from using templates, though the compilation time overhead can be significant.
 For larger projects that make heavy use of templates, hours-long compile times are not unheard of.
 
@@ -21,19 +21,19 @@ You could also use `class` instead of `typename`, but I prefer `typename`, since
 `class` is the older syntax, and is more common in older code.
 Here is an example of how the standard library `std::move` might be implemented:
 
-INSERT LINK function_template.cpp
+https://github.com/CIS1900/2022-fall/blob/d91d40f24cae43d79b0da73dcd98b96db62e39ec/10/function_template.cpp#L1-L33
 
 Here, we were not required to explicitly give the template argument when we called `my_swap`, since the compiler can deduce it from the arguments we pass.
 This example also includes an alternate way of writing function templates called an [abbreviated function template](https://en.cppreference.com/w/cpp/language/function_template#Abbreviated_function_template): using `auto`.
 Each parameter with `auto` as its type is equivalent to adding another template parameter and giving the function parameter that type.
 Here, this use of `auto` is not ideal, because for a `swap` function we really want our parameters to have the same type, which we cannot express using this syntax.
 
-Last class, we talked about the fact that most parts of the standard standard library are *not* object-objected oriented, to avoid the overhead of virtual functions.
-Instead, we can use templates to write code that abstracts over these objects, since they still have a common interface, just not one that is formalized in a base class.
+Last class, we talked about the fact that most parts of the standard standard library are *not* object-oriented, to avoid the overhead of virtual functions.
+Instead, we can use templates to write code that abstracts over these types, since they still have a common interface, just not one that is formalized in a base class.
 
-INSERT LINK containers.cpp
+https://github.com/CIS1900/2022-fall/blob/d91d40f24cae43d79b0da73dcd98b96db62e39ec/10/containers.cpp#L1-L21
 
-Note that this method is not a complete replacement for subtyping and virtual functions.
+Note that templates are not a complete replacement for subtyping and virtual functions.
 While templates are useful for writing code for different types, they do *not* provide dynamic dispatch, where the program can choose which function to call based on what type an object has, all at *run time*.
 Instead, all the work that templates do is at *compile time*.
 They generate code and call functions for different types, based purely on compile-time type information, known as *static dispatch*.
@@ -43,7 +43,7 @@ They generate code and call functions for different types, based purely on compi
 We can also write *class templates*.
 We've seen lots of examples of these already, like smart pointers and container classes.
 
-INSERT LINK class_template.cpp
+https://github.com/CIS1900/2022-fall/blob/d91d40f24cae43d79b0da73dcd98b96db62e39ec/10/class_template.cpp#L1-L29
 
 Unlike function templates, there is no abbreviated version using `auto`, since it is typically essential to refer to the name of the type in a class template.
 
@@ -55,15 +55,19 @@ If the template implementation *were* compiled separately, then it would have to
 
 The solution is to implement all your functions in the header file.
 You could do this directly, like in our example above, or you could break up the interface and implementation for organizational reasons.
-The class definition would go in a header file as usual, and the function definitions can go into an implementation file (usually `.tpp` for template implementations), which is then `#include`d at the bottom of the header.
+The class definition would go in a header file as usual, and the function definitions can go into an implementation file (usually with a `.tpp` file extension for template implementations), which is then `#include`d at the bottom of the header.
 The following shows this approach for the same `wrapper` class example as earlier:
 
-ISNERT LINK templates/wrapper.hpp, tpp, main
+https://github.com/CIS1900/2022-fall/blob/d91d40f24cae43d79b0da73dcd98b96db62e39ec/10/templates/wrapper.hpp#L1-L17
+
+https://github.com/CIS1900/2022-fall/blob/d91d40f24cae43d79b0da73dcd98b96db62e39ec/10/templates/wrapper.tpp#L1-L15
+
+https://github.com/CIS1900/2022-fall/blob/d91d40f24cae43d79b0da73dcd98b96db62e39ec/10/templates/main.cpp#L1-L11
 
 ## Type Constraints
 
 Often, we want some restrictions on what kind of type arguments are acceptable for a template.
-For example, the `print` function template in an earlier example expects its template argument to be a container type that can be iterated through using a ranged-based for loop.
+For example, the `print` function template in the earlier example expects its template argument to be a container type that can be iterated through using a ranged-based for loop.
 If we call `print` with a template argument that is not a container, like `print(1)` (where the deduced template argument is `int`), then things will go wrong.
 However, due to how templates work, what happens is that the compiler will generate the code for `print<int>`, and only then will it see that something is wrong, that we are trying to iterate over an `int` using a range-based for loop.
 This leads to long and confusing error messages, like the following for `print(1)`:
@@ -128,13 +132,13 @@ In file included from /usr/include/c++/10/string:54,
 ```
 
 If you read it carefully, you can see that the issue is that `int` does not have the `begin` and `end` members.
-From this you can infer that the problem is that the function template expects a container as the template argument, but this is far from clear, and can be very confusing, as you may have experienced in previous assignments.
+From this you can infer that the problem is that the function template expects a container as the template argument, but this is far from clear, as you may have experienced in previous assignments.
 
 C++ allows us to define *type constraints* for templates, or requirements on types.
 These requirements are then enforced at compile-time, and result in better error messages.
 For the `print` example from before, we can add a requirement that the template argument be a `range` (from the `ranges` library), or something that can be iterated through using `begin()` and `end()` iterators:
 
-INSERT LINK print_error.cpp
+https://github.com/CIS1900/2022-fall/blob/d91d40f24cae43d79b0da73dcd98b96db62e39ec/10/print_error.cpp#L1-L26
 
 Compiling this function now gives an error like:
 
@@ -171,7 +175,6 @@ This is shorter and nicer than the previous one, telling us explicitly that ther
 This type constraint is specified by the `requires ranges::range<Container>` line.
 If it is commented out, then you would get an error similar to the first longer one above.
 This line says that the requirement is something called `ranges::range`, applied to the type `Container`.
-This comes from the `ranges` namespace, which is part of the standard library.
 
 In place of `template <typename Container> requires ranges::range<Container>`, this could also be written as just `template <ranges::range Container>`, replacing `typename` with the constraint that should be applied to that argument.
 Another alternative is to use the `auto` syntax, and to write `void print(ranges::range auto c)`, which applies the constraint to the type of `c`.
@@ -180,21 +183,25 @@ As another example, if we consider the previous `wrapper` code, then using a typ
 However, if we never call `set`, then `wrapper<foo>::set` is never generated, and the code compiles without error.
 By adding a type constraint `copyable`, we can catch this error "early" in compilation, rather than "late" as is usual with templates:
 
-INSERT LINK wrapper_error.cpp
+https://github.com/CIS1900/2022-fall/blob/d91d40f24cae43d79b0da73dcd98b96db62e39ec/10/wrapper_error.cpp#L1-L37
 
-If we do want this behavior, that it should be ok that `T` does not support `=` as long as we never call `set`, then we can do this as well.
+Comment out the type constraint to see this code successfully compile as long as `set` is not called.
+
+If we do want this behavior that it should be ok that `T` does not support `=` as long as we never call `set`, then we can do this as well.
 We can add the type constraint to the member function only, instead of the entire class template, using `void set(T t) requires copyable<T> ...`.
-Since copy construction is still required by the constructor, we should still require that type constraint, which we can do using `requires copy_constructible<T>` for the class template.
+Then, this requirement on the type `T` is only enforced if `set` is called.
+Since copy construction is still used by the constructor, we should still require that type constraint for the entire class, which we can do using `requires copy_constructible<T>` for the class template.
 
 ### Concepts
 
 The type constraints we saw above used named constraints, which are called *concepts* in C++.
 These concepts were defined in the standard library, and we can also define our own.
 While the above examples use a single concept each, multiple can be combined using `&&` and `||` after the `requires`.
+The ones in the example above all are requirements on a single type, but concepts can also be constraints over multiple types, such as `convertible_to<From, To>`, which requires that `From` is convertible to `To`.
 
 In the following example, we define a concept requiring that the type `T` allows `const T &`s to be added using `+`:
 
-INSERT LINK concepts.cpp
+https://github.com/CIS1900/2022-fall/blob/d91d40f24cae43d79b0da73dcd98b96db62e39ec/10/concepts.cpp#L1-L23
 
 Concepts are essentially predicates that are checked by the compiler at compile-time.
 This concept checks that `x + x` is a valid expression.
@@ -209,11 +216,12 @@ requires requires (const T & x) {x + x;}
 Built-in concepts in the standard library can be found [on this page](https://en.cppreference.com/w/cpp/concepts).
 These concepts often have some *semantic* meaning on top of the *syntactic* ones in the concept definition.
 For example, this could be things like `addable` ensuring that `a + b == b + a`.
-Such constraints are only in the comments and documentation, and are not checked by the compiler.
+Such semantic constraints are only in the comments and documentation, and are not checked by the compiler.
 
 You may notice that the error messages for standard library classes like `vector` or `unique_ptr` are long and cryptic, exactly the problem that type constraints and concepts aim to solve.
-However, the standard library does not typically use them (I'm speculating here) in order to keep these class templates flexible.
+This is because the standard library does not typically use type constraints in order to (I'm speculating here) keep these class templates flexible.
 For example, while it may be useful to have the values in a `list` to be copyable, it would not matter if the `list` is never copied.
+Though as mentioned earlier, this could be achieved by attaching type constraints to individual member functions.
 A second---and probably more important---reason is that concepts and type constraints are very new, only introduced in C++20, so it may just take time before they are added to existing code in the standard library.
 
 ## Other Notes on Templates
@@ -221,15 +229,17 @@ A second---and probably more important---reason is that concepts and type constr
 ### Default Template Arguments
 
 Templates also support default arguments, which is how class templates like `queue` have a default underlying container type.
-These have similar rules are default argument for normal functions, and are written using `=`.
+These have similar rules as default argument for normal functions, and are written using `=`.
 
 ### Template Specialization
 
 Templates can also be *specialized*, which is when a custom implementation is given for specific template arguments.
 For example, the standard library provides a specialization for [`vector<bool>`](https://en.cppreference.com/w/cpp/container/vector_bool) to make it more space efficient.
 This is because the size of a `bool` is implementation-defined, and is typically not one bit, but a byte.
-In fact, `sizeof` returns the size of a type in bytes, so it would be difficult to make a 1-bit `bool` work properly in general.
+In general, it would be difficult to make a 1-bit `bool` work properly.
 For this reason, `vector<bool>` gives a more space-efficient implementation, though how it is more efficient is implementation-defined as well.
+
+We will see examples of template specializations in next class's notes.
 
 ### Type Aliases in Templates
 
@@ -240,10 +250,10 @@ This is the same as `typedef`, and is equivalent to `typedef T value_type;` in C
 
 When using such member types, it is necessary to prepend `typename` to the member type, to tell the compiler that the member is a type:
 
-INSERT LINK value_type.cpp
+https://github.com/CIS1900/2022-fall/blob/d91d40f24cae43d79b0da73dcd98b96db62e39ec/10/value_type.cpp#L1-L34
 
-In this example, the compiler cannot know that the abstract `Container` type' member named `value_type` is a type, since `Container` can be instantiated with anything.
-So to help it along and make this code compile, we need to tell it that this member is a type using `typename`.
+In this example, the compiler cannot know that the abstract `Container` type's member named `value_type` is a type, since `Container` can be instantiated with anything.
+So to help it along and make this code compile, we need to tell it that this member is supposed to be a type using `typename`.
 For things like `vector<int>::iterator`, this was not necessary, since all types there are concrete, and it can be easily checked that this expression evaluates to a type.
 
 The above code also contains an example of a more complex type constraint, requiring both that we can iterate through the container and that the `value_type` of the container can be summed up using `+=`.
