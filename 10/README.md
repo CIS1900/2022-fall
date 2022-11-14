@@ -19,7 +19,7 @@ This is a function that abstracts over input types.
 The template parameters, identified by the `typename` keyword, go inside the angle brackets.
 You could also use `class` instead of `typename`, but I prefer `typename`, since not all types are classes (e.g. built-in types like `int`).
 `class` is the older syntax, and is more common in older code.
-Here is an example of how the standard library `std::move` might be implemented:
+Here is an example of how the standard library `std::swap` might be implemented:
 
 https://github.com/CIS1900/2022-fall/blob/d91d40f24cae43d79b0da73dcd98b96db62e39ec/10/function_template.cpp#L1-L33
 

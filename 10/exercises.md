@@ -3,8 +3,9 @@
 Consider the two `edit` functions you wrote last class (the one we did together is [here](../09/exercise.cpp)).
 Unify these functions into one using a function template.
 
-If you have some extra time, look at the [concepts library](https://en.cppreference.com/w/cpp/concepts) and think about which concepts may be useful as type constraints for your template argument.
+Then, look at the [concepts library](https://en.cppreference.com/w/cpp/concepts) and think about which concepts may be useful as type constraints for your template argument.
 Are these concepts sufficient to capture everything you need out of the template argument?
+Add type constraints to the `edit` function template you wrote.
 
 ## Exercise 2: Writing our own `unique_ptr`
 
