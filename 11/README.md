@@ -6,7 +6,7 @@ Higher-order functions, as you've seen in CIS 1200, are really useful.
 To pass around functions, we can use function pointers, but these are not ideal.
 Combining function pointers with template arguments can be difficult, and function pointers only work with regular functions, defined at compile-time.
 This means you cannot dynamically build a function at runtime and obtain a function pointer to it.
-Function objects solve both problems in C++.
+Function objects solve both of these problems in C++.
 
 ## Function Objects
 
@@ -15,12 +15,12 @@ This is done by overloading `operator()` in the class.
 The parameter list and return type of `operator()` can be fully customized, and serves as the parameter list and return type of the functor as a whole.
 Since a function object is still a normal object, you could give the class some member variables in order to change its behavior:
 
-INSRET functor1.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/functor1.cpp#L1-L25
 
 The class of a function object can also be made into a class template, to accomodate different type arguments.
 Then, a function template that expects a function argument can use a template argument to specify the type of the function, as shown in this example:
 
-INSRET functor2.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/functor2.cpp#L1-L40
 
 This code uses the `predicate<T>` concept, which constrains the type to be something that can be called with a `T` and returns something that can be converted to a `bool`.
 This allows for both functors and function pointers to be passed in as arguments.
@@ -36,10 +36,10 @@ As mentioned in an earlier class, `hash` is implemented using templates, to avoi
 `unordered_map` uses `std::hash` by default to hash values.
 One way to provide a hash function for a custom key class is to write your own class for a functor, and pass that to the `unordered_map` to use instead of `std::hash`:
 
-INSRET hash1.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/hash1.cpp#L1-L32
 
 This hash function uses bitwise xor (`^`) and left bitshift (`<<`) to combine the hash values of the first and last name (obtained using `std::hash`) in a "random-looking" way.
-`==` is required to be defined, and is used when there are hash collisions.
+`==` is required to be defined for our key class, and is used when there are hash collisions.
 
 An alternative method is to make `std::hash` work with your class, rather than bypassing its use entirely.
 `std::hash<T>` is a class template, which, when instantiated into an object, is a function object representing the hash function for the type `T`.
@@ -48,7 +48,7 @@ The standard library provides specializations of `std::hash` for the built-in an
 For all other types without a specialization, trying to use `std::hash` will result in a compiler error.
 So for your own class, you can write a specialization of `std::hash` for it:
 
-INSRET hash2.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/hash2.cpp#L1-L35
 
 Since `hash` is inside the `std` namespace, we first need to "open" the `std` namespace.
 Then, to specialize the template, we just need to provide the type argument we are writing the specialization for.
@@ -61,7 +61,7 @@ We can customize this using the template argument following the key and value ty
 Objects of this type are function objects that take two `Key`s and returns the result of comparing them using `operator<`.
 The standard library also provides `greater<Key>`, `less_equal<Key>`, and `greater_equal<Key>`, though the ones involving equality are likely not suitable, as shown by the [example](../09/map2.cpp) from class 9.
 
-INSERT LINK map.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/map.cpp#L1-L37
 
 Remember that just as with `std::hash`, the template argument is a *type*, where every object of this type is a function object, and each of these function objects behaves identically.
 
@@ -69,11 +69,11 @@ Remember that just as with `std::hash`, the template argument is a *type*, where
 
 While function objects are a good solution for representing functions, it is very inconvenient to write a new class for each function.
 One useful feature in C++ is that classes can be nested within other classes and functions, reducing the amount of classes polluting the overall context.
-`lambda`s are a feature that is more useful for shortening your function object code.
+An even more useful feature for shortening your function object code is the *lambda*.
 
 A lambda expression is basically shorthand for declaring a function object (not the class of that function object!):
 
-INSRET lambda.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/lambda.cpp#L1-L19
 
 The syntax is fairly straightforward, allowing you to write the parameter list and body of the function as usual.
 The `[]` part is the capture list, discussed below.
@@ -90,37 +90,38 @@ On the other hand, `[&var]` captures `var` by reference, taking a reference to t
 Multiple variables can be captured by separating them by commands in the capture list.
 Finally, `[=]` and `[&]` capture *everything* by value and reference respectively.
 
-INSERT LINK capture.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/capture.cpp#L1-L24
 
 Lambda expressions can also be *generic*, by using `auto` for its arguments.
 This is basically shorthand for declaring a template class for a function object:
 
-INSERT LINK generic_lambda.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/generic_lambda.cpp#L1-L14
 
 To write the return type of a lambda, you can use the syntax `-> T` after the parameter list to specify that the lambda has return type `T`.
 Typically this can be inferred and it can be omitted, but sometimes it must be manually specified.
 When dealing with generic lambdas, `decltype` is often useful here, since you do not know the types in advance.
 
-## <algorithm>
+## `<algorithm>`
 
 The standard library provides a long list of algorithms in `<algorithm>`.
 Most of these are function templates that take iterator arguments.
 In fact, the current standard library is heavily based on the *standard template library*, or STL, a library written in 1993.
 The influence of this library is massive, and many people still call the standard library the STL.
+We will look at some examples of function templates provided by the standard library next:
 
 `for_each(first, last, f)` calls a function `f` on each element of the range defined by iterators `first` and `last`.
 A range-based for loop is often simpler for an entire container, but `for_each` allows the exact range to be specified.
 
-INSERT for_each.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/for_each.cpp#L1-L18
 
 `find(first, last, v)` returns an iterator to the first place where `v` is found in the range, or the end iterator `last` if no match is found.
 There are also `find_if` and `find_if_not` variants that take a predicate rather than just a value.
 
-INSERT find.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/find.cpp#L1-L27
 
 This example gives a taste of the variety of functions available in `<algorithm>`:
 
-INSERT algorithms.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/algorithms.cpp#L1-L42
 
 `iota` fills a range with an incrementing sequence, starting at some value.
 It is named after the ι function that did the same thing in APL, a programming language.
@@ -139,25 +140,25 @@ This means that these functions cannot directly affect the size of the container
 
 For example, `remove` shifts the elements in the range to remove some elements, and returns a new end of range iterator. The underlying container's size is unchanged:
 
-INSERT remove1.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/remove1.cpp#L1-L22
 
 One option to modify the container is by directly referring to it.
 For example, after calling `remove`, we can call `erase` on the container using the iterator returned by `remove`:
 
-INSERT remove2.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/remove2.cpp#L1-L16
 
 As another example, `copy` assumes there is enough space in the destination container to copy the source range:
 
-INSERT copy1.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/copy1.cpp#L1-L14
 
 One solution is to ensure there is enough space by resizing before calling `copy`:
 
-INSERT copy2.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/copy2.cpp#L1-L16
 
 Another solution is to use an iterator that knows more about the container.
 For example `back_inserter`, `inserter`, and `front_inserter` (in `<iterator>`) create special iterators that call `push_back`, `insert`, and `push_front` respectively, so the container grows when something is written via the iterator:
 
-INSERT copy3.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/copy3.cpp#L1-L17
 
 ### Parallel Algorithms
 
@@ -185,15 +186,15 @@ More sophisticated functional programming is also possible.
 
 `bind` in `<functional>` partially applies a function, a useful operation for functional programming:
 
-INSERT bind.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/bind.cpp#L1-L18
 
 To specify that an argument should be left unbound, use `placeholders::_1`, `placeholders::_2`, etc . (in order).
-In this example, we first create a functor using `less<int>()` (which calls the constructor of the `less<int>` class), then use `bind` to set its second argument to 3, resulting in the function `fun x => x < 3`.
+In this example, we first create a functor using `less<int>()` (which calls the constructor of the `less<int>` class), then uses `bind` to set its second argument to 3, resulting in the function `fun x => x < 3`.
 
 `<functional>` also provides many other functor versions of common operations, like `plus`, which just wraps `+`.
 Other common higher-order functions are available as well, like `accumulate` (in `<numeric>`) which is a fold, and `transform` (in `<algorithm>`) which is a map:
 
-INSERT higher.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/higher.cpp#L1-L21
 
 ### Function Types
 
@@ -202,7 +203,7 @@ In the case when the functor is a lambda, the type is some *unspecified* unique 
 An alternative is `std::function<T>`, which is a class that can hold any callable function of a type `T`.
 This is useful for writing recursive lambdas, since `auto` needs to know the type of what it's capturing, but that type depends on itself:
 
-iNSERT recursion.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/recursion.cpp#L1-L17
 
 In this example, we need to capture by reference since capturing by value gets an uninitialized `function`.
 Note that you can't return this lambda since it depends on a reference to a local variable (itself).
@@ -210,7 +211,7 @@ There are also other methods to create recursive lambdas, but this is the most s
 
 `function` is also useful for storing a heterogeneous collction of functions with the same function signature, but not necessarily the same type:
 
-INSERT function.cpp
+https://github.com/CIS1900/2022-fall/blob/f4e525a9d150bcf9eb98be13aaf7aaa99f0e6255/11/functions.cpp#L1-L29
 
 This cannot be done using templates, just like how templates cannot store a collection of objects of different types in the same container, and something like object-oriented programming must be used instead.
 Just like that use case, you should prefer templates to using `function` if possible, since `function` has some runtime overhead, due to indirection from having to follow a pointer to the actual function, as well as possibly having to copy the function object.
