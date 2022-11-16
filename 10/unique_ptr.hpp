@@ -8,30 +8,55 @@ class unique_ptr
 public:
     unique_ptr(T * p) noexcept : p {p}
     {}
+
     unique_ptr(const unique_ptr &) = delete;
     unique_ptr(unique_ptr && o) noexcept : p {o.p}
     {
         o.p = nullptr;
     }
+
     ~unique_ptr()
     {
         delete p;
     }
 
     unique_ptr & operator=(const unique_ptr&) = delete;
+
     unique_ptr & operator=(unique_ptr && o) noexcept
     {
+        delete p;
         p = o.p;
         o.p = nullptr;
     }
 
     // TODO
-    T * release() noexcept;
-    void reset(T *) noexcept;
-    T * get() const noexcept;
+    T * release() noexcept
+    {
+        T * q {p};
+        p = nullptr;
+        return q;
+    }
 
-    T & operator*() const;
-    T * operator->() const noexcept;
+    void reset(T * q) noexcept
+    {
+        delete p;
+        p = q;
+    }
+
+    T * get() const noexcept
+    {
+        return p;
+    }
+
+    T & operator*() const
+    {
+        return *p;
+    }
+
+    T * operator->() const noexcept
+    {
+        return p;
+    }
 };
 
 #endif
