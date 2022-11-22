@@ -5,13 +5,13 @@
 In addition to type arguments, templates can also have value arguments.
 Using these instead of regular function arguments is sometimes *necessary*, for example for arrays, where the size of the array must be a compile-time constant:
 
-INSERT array.cpp
+https://github.com/CIS1900/2022-fall/blob/b06956945d1b138ef9676c2d592a5c9a72b5f23a/12/array.cpp#L1-L23
 
 This example also has the benefit of allocating an array on the stack instead of the heap, avoiding having to manually manage the array allocated using `new []` if we made the size of the array a regular parameter.
 
 Other times, value template arguments are useful for performance, since, as usual, the template will act as a code-generation mechanism.
 
-INSERT pow.cpp
+https://github.com/CIS1900/2022-fall/blob/b06956945d1b138ef9676c2d592a5c9a72b5f23a/12/pow.cpp#L1-L20
 
 In this example, we avoid having to pass in `2` as a normal function argument at runtime, instead generating custom code for the case when `base` is `2`.
 Doing this may also aid the compiler in doing optimizations, since it sees that the code is just multiplying by `2` inside a loop, and can be replaced with a single bit shift.
@@ -32,7 +32,7 @@ const int c {i};
 `constexpr`, standing for *constant expression*, is a stronger notion of immutability than `const`.
 A variable that is declared `constexpr` means that it will be known as compile time, and is suitable for use as a template argument:
 
-INSERT constexpr1.cpp
+https://github.com/CIS1900/2022-fall/blob/b06956945d1b138ef9676c2d592a5c9a72b5f23a/12/constexpr1.cpp#L1-L26
 
 `constexpr` variables are also `const` automatically, and are useful for declaring constants, similar to how `#define` is used in C.
 While this is useful, the real power of `constexpr` is the ability to define `constexpr` *functions*, which will force computation to happen at compile time.
@@ -41,7 +41,7 @@ A function can be declared as `constexpr`, which signals to the compiler that th
 There are some restrictions on the function for it to be `constexpr`, such as that it can only use local variables (no globals!) and cannot have other side effects.
 These restrictions are similar to pure functions in functional programming and are detailed [here](https://en.cppreference.com/w/cpp/language/constexpr).
 
-INSERT constexpr2.cpp
+https://github.com/CIS1900/2022-fall/blob/b06956945d1b138ef9676c2d592a5c9a72b5f23a/12/constexpr2.cpp#L1-L12
 
 A `constexpr` function can also be run on non-`constexpr` arguments, in which case it will run normally (at runtime).
 When a `constexpr` function is run on `constexpr` arguments, then the output is `constexpr` as well, and this is all computed at compile-time.
@@ -59,9 +59,9 @@ The term *template metaprogramming* in C++ typically refers to more complex usag
 This style is actually Turing-complete[^1], and was not the original intent of the C++ designers.
 Basically, it is possible to use class templates as a functional programming language, where template specializations are the base cases, and values are stored as `static` class variables:
 
-INSERT fib.cpp
+https://github.com/CIS1900/2022-fall/blob/b06956945d1b138ef9676c2d592a5c9a72b5f23a/12/fib.cpp#L1-L24
 
-In this example, we define a class template for calculating the $N$th Fibonnaci number.
+In this example, we define a class template for calculating the `N`th Fibonnaci number.
 It is essential that we store the value of interest in a `static` variable, rather than in a member function.
 If we instead defined a `int value()` member function, then `fib<3>::value()` would expand to `fib<2>::value() + fib<1>::value()`, which would result in these functions being called at runtime, defeating the purpose of template metaprogramming.
 By using a `static` variable, `fib<3>::value` expands out to `fib<2>::value + fib<1>::value`, which is `1 + 1`, and the compiler simplifies that to the answer, `2`.
@@ -71,11 +71,12 @@ Note that for template specializations, the general case must come first, with s
 As a second example, we will consider the [Collatz conjecture](https://en.wikipedia.org/wiki/Collatz_conjecture), which has to do with sequences of positive integers.
 When the number `n` is even, the next number in the sequence is `n / 2`.
 When the number `n` is odd, then the next number is `3n + 1`.
-Experimentally, no matter what number you start from, the sequence goes to `1` eventually, but there is no proof that the sequence will always reach `1` from any starting number.
+Empirically, using all numbers anyone has tried to start from, the sequence goes to `1` eventually.
+But there is no mathematical proof that the sequence will always reach `1` from any starting number.
 
 This example will focus on counting how many steps it takes to reach 1, starting from an arbitrary starting number:
 
-INSERT collatz.cpp
+https://github.com/CIS1900/2022-fall/blob/b06956945d1b138ef9676c2d592a5c9a72b5f23a/12/collatz.cpp#L1-L54
 
 This program uses a helper class template, `CollatzHelper`, to use a second template parameter to keep track of whether the first parameter is even or odd.
 It is capable of doing quite a lot of work at compile-time, though this program may not compile on your machine, due to the recursion being too deep.
