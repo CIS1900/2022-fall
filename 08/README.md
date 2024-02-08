@@ -223,6 +223,8 @@ This is useful to signal to waiting threads that something new is available, by 
 
 https://github.com/CIS1900/2022-fall/blob/4162567a1ad3c63722e4261090519c50e0ad0410/08/semaphore.cpp#L1-L39
 
+**NOTE: this code snippet doesn't work since `std::queue` is not thread-safe. Multiple threads in `push` or `pop` is not safe!**
+
 This is useful for allowing multiple threads into a critical section, not just one.
 In this example, we use the semaphore to represent how many values are available to consume in the shared `queue`, and that many consumers are allowed in at the same time.
 
